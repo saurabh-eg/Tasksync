@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 import os
 import logging
+import warnings
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
@@ -84,8 +85,11 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'fallback-secret-key')
 JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRE_MINUTES', 30))
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing with better error handling for bcrypt compatibility
+import warnings
+warnings.filterwarnings("ignore", message=".*bcrypt.*", category=UserWarning)
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 security = HTTPBearer()
 
 @asynccontextmanager
@@ -103,16 +107,34 @@ api_router = APIRouter(prefix="/api")
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
-    # Truncate password to 72 bytes for bcrypt compatibility
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password with better error handling"""
+    try:
+        # Truncate password to 72 bytes for bcrypt compatibility
+        if len(plain_password.encode('utf-8')) > 72:
+            plain_password = plain_password[:72]
+        
+        # Suppress bcrypt version warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        logger.error(f"Password verification error: {e}")
+        return False
 
 def get_password_hash(password):
-    # Truncate password to 72 bytes for bcrypt compatibility
-    if len(password.encode('utf-8')) > 72:
-        password = password[:72]
-    return pwd_context.hash(password)
+    """Hash password with better error handling"""
+    try:
+        # Truncate password to 72 bytes for bcrypt compatibility
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
+        
+        # Suppress bcrypt version warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return pwd_context.hash(password)
+    except Exception as e:
+        logger.error(f"Password hashing error: {e}")
+        raise HTTPException(status_code=500, detail="Password hashing failed")
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -183,59 +205,73 @@ class Task(BaseModel):
 # Auth Routes
 @api_router.post("/auth/register", response_model=Token)
 async def register(user: UserCreate):
-    # Check if user exists
-    existing_user = await db.users.find_one({"email": user.email})
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    try:
+        # Check if user exists
+        existing_user = await db.users.find_one({"email": user.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Hash password and create user
+        hashed_password = get_password_hash(user.password)
+        user_doc = {
+            "email": user.email,
+            "name": user.name,
+            "hashed_password": hashed_password,
+            "created_at": datetime.utcnow()
+        }
+        
+        result = await db.users.insert_one(user_doc)
+        user_id = str(result.inserted_id)
+        
+        # Create token
+        access_token_expires = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user_id}, expires_delta=access_token_expires
+        )
+        
+        # Return user and token
+        user_response = User(
+            id=user_id,
+            email=user.email,
+            name=user.name,
+            created_at=user_doc["created_at"]
+        )
+        
+        return Token(access_token=access_token, token_type="bearer", user=user_response)
     
-    # Hash password and create user
-    hashed_password = get_password_hash(user.password)
-    user_doc = {
-        "email": user.email,
-        "name": user.name,
-        "hashed_password": hashed_password,
-        "created_at": datetime.utcnow()
-    }
-    
-    result = await db.users.insert_one(user_doc)
-    user_id = str(result.inserted_id)
-    
-    # Create token
-    access_token_expires = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user_id}, expires_delta=access_token_expires
-    )
-    
-    # Return user and token
-    user_response = User(
-        id=user_id,
-        email=user.email,
-        name=user.name,
-        created_at=user_doc["created_at"]
-    )
-    
-    return Token(access_token=access_token, token_type="bearer", user=user_response)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Registration error: {e}")
+        raise HTTPException(status_code=500, detail="Registration failed")
 
 @api_router.post("/auth/login", response_model=Token)
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email})
-    if not user or not verify_password(credentials.password, user["hashed_password"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    try:
+        user = await db.users.find_one({"email": credentials.email})
+        if not user or not verify_password(credentials.password, user["hashed_password"]):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        user_id = str(user["_id"])
+        access_token_expires = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user_id}, expires_delta=access_token_expires
+        )
+        
+        user_response = User(
+            id=user_id,
+            email=user["email"],
+            name=user["name"],
+            created_at=user["created_at"]
+        )
+        
+        return Token(access_token=access_token, token_type="bearer", user=user_response)
     
-    user_id = str(user["_id"])
-    access_token_expires = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user_id}, expires_delta=access_token_expires
-    )
-    
-    user_response = User(
-        id=user_id,
-        email=user["email"],
-        name=user["name"],
-        created_at=user["created_at"]
-    )
-    
-    return Token(access_token=access_token, token_type="bearer", user=user_response)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
 
 @api_router.get("/auth/me", response_model=User)
 async def get_me(current_user: dict = Depends(get_current_user)):
