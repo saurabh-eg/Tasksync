@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timedelta
 import jwt
 from bson import ObjectId
+from contextlib import asynccontextmanager
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -87,8 +88,15 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRE_MI
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    yield
+    # Shutdown
+    client.close()
+
 # Create the main app without a prefix
-app = FastAPI(title="Todo App API", version="1.0.0")
+app = FastAPI(title="Todo App API", version="1.0.0", lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -400,6 +408,11 @@ async def get_task_stats(current_user: dict = Depends(get_current_user)):
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow()}
 
+# CORS preflight handler
+@api_router.options("/{path:path}")
+async def options_handler():
+    return {"message": "OK"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -407,7 +420,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=["*"],
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -417,7 +430,3 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
