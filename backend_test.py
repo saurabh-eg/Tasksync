@@ -12,14 +12,29 @@ import os
 
 # Get backend URL from frontend .env file
 def get_backend_url():
-    try:
-        with open('/app/frontend/.env', 'r') as f:
-            for line in f:
-                if line.startswith('EXPO_PUBLIC_BACKEND_URL='):
-                    return line.split('=', 1)[1].strip()
-    except Exception as e:
-        print(f"Error reading frontend .env: {e}")
-        return None
+    # Try multiple possible paths for the .env file
+    possible_paths = [
+        'frontend/.env',  # Running from project root
+        '../frontend/.env',  # Running from backend directory
+        '.env'  # Running from frontend directory
+    ]
+    
+    for path in possible_paths:
+        try:
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    for line in f:
+                        if line.startswith('EXPO_PUBLIC_BACKEND_URL='):
+                            url = line.split('=', 1)[1].strip()
+                            print(f"Found backend URL in {path}: {url}")
+                            return url
+        except Exception as e:
+            continue
+    
+    print("Error: Could not find .env file in any of these locations:")
+    for path in possible_paths:
+        print(f"  - {path} (exists: {os.path.exists(path)})")
+    return None
 
 BASE_URL = get_backend_url()
 if not BASE_URL:

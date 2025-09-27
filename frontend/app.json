@@ -7,10 +7,14 @@
     "icon": "./assets/images/icon.png",
     "scheme": "tasksync",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "description": "A powerful task management app to sync and organize your tasks",
     "privacy": "public",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tasksync.app"
@@ -20,7 +24,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1e3a8a"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.tasksync.app",
       "versionCode": 1,
       "permissions": [
@@ -49,11 +52,9 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {
-        "origin": false
-      },
+      "backendUrl": "https://tasksyncpro.up.railway.app",
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "44952e1c-bb75-4be7-a1af-33e34e2a88d7"
       }
     }
   }

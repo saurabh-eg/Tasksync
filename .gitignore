@@ -6,6 +6,15 @@
 
 .env
 
+# test files
+test_*.py
+tests.py
+pytest.ini
+
+debug_auth.py
+fix_summary.md
+*.md
+.env.local
 # Dependencies
 node_modules/
 /node_modules
