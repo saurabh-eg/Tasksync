@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Alert,
   ActivityIndicator,
@@ -13,6 +12,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -277,7 +277,7 @@ export default function TaskDetailScreen() {
 
   if (isLoading && !task) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3b82f6" />
           <Text style={styles.loadingText}>Loading task...</Text>
@@ -288,7 +288,7 @@ export default function TaskDetailScreen() {
 
   if (!task) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
           <Text style={styles.errorText}>Task not found</Text>
@@ -301,7 +301,7 @@ export default function TaskDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="light-content" backgroundColor="#1e3a8a" />
       
       <KeyboardAvoidingView 
@@ -562,8 +562,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#1e3a8a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e40af',
   },
   headerButton: {
     padding: 8,

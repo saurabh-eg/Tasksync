@@ -4,12 +4,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   Alert,
   Switch,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
@@ -231,7 +231,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="light-content" backgroundColor="#1e3a8a" />
       
       {/* Header */}
@@ -256,7 +256,7 @@ export default function SettingsScreen() {
         {/* App Version */}
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>TaskSync v1.0.0</Text>
-          <Text style={styles.versionSubtext}>Built with React Native & Expo</Text>
+          <Text style={styles.versionSubtext}>© 2025 Saurabh Mishra. All rights reserved.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -273,8 +273,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     backgroundColor: '#1e3a8a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e40af',
   },
   backButton: {
     padding: 8,
@@ -344,15 +346,19 @@ const styles = StyleSheet.create({
   versionContainer: {
     alignItems: 'center',
     paddingVertical: 32,
+    paddingHorizontal: 20,
   },
   versionText: {
     fontSize: 16,
     color: '#64748b',
     fontWeight: '500',
+    textAlign: 'center',
   },
   versionSubtext: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#475569',
     marginTop: 4,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

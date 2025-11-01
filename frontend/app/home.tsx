@@ -252,19 +252,19 @@ export default function HomeScreen() {
         <View style={styles.statsContainer}>
           <View style={[styles.statCard, styles.totalCard]}>
             <Text style={styles.statNumber}>{stats.total_tasks}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel} numberOfLines={1}>Total</Text>
           </View>
           <View style={[styles.statCard, styles.completedCard]}>
             <Text style={styles.statNumber}>{stats.completed_tasks}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statLabel} numberOfLines={1}>Completed</Text>
           </View>
           <View style={[styles.statCard, styles.pendingCard]}>
             <Text style={styles.statNumber}>{stats.pending_tasks}</Text>
-            <Text style={styles.statLabel}>Pending</Text>
+            <Text style={styles.statLabel} numberOfLines={1}>Pending</Text>
           </View>
           <View style={[styles.statCard, styles.overdueCard]}>
             <Text style={styles.statNumber}>{stats.overdue}</Text>
-            <Text style={styles.statLabel}>Overdue</Text>
+            <Text style={styles.statLabel} numberOfLines={1}>Overdue</Text>
           </View>
         </View>
       )}
@@ -394,15 +394,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+    gap: 8,
   },
   statCard: {
     flex: 1,
     backgroundColor: '#334155',
     borderRadius: 12,
-    padding: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    marginHorizontal: 2,
     borderWidth: 1,
+    minWidth: 0,
   },
   totalCard: {
     borderColor: '#3b82f6',
@@ -417,14 +419,15 @@ const styles = StyleSheet.create({
     borderColor: '#ef4444',
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#ffffff',
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#cbd5e1',
-    marginTop: 2,
+    textAlign: 'center',
   },
   emptyState: {
     flex: 1,
