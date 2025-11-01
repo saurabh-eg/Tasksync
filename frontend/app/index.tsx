@@ -7,7 +7,8 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,10 +60,15 @@ export default function WelcomeScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
-        <StatusBar barStyle="light-content" backgroundColor="#1e3a8a" />
+        <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3b82f6" />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Image 
+            source={require('../assets/images/splash-image.png')} 
+            style={styles.splashImage}
+            resizeMode="contain"
+          />
+          <ActivityIndicator size="large" color="#3b82f6" style={styles.loader} />
+          <Text style={styles.loadingText}>Loading TaskSync...</Text>
         </View>
       </SafeAreaView>
     );
@@ -70,13 +76,18 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#1e3a8a" />
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
       
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
+          <Image 
+            source={require('../assets/images/icon.png')} 
+            style={styles.appLogo}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>TaskSync</Text>
-          <Text style={styles.subtitle}>Your Smart To-Do Companion</Text>
+          <Text style={styles.subtitle}>Smart Task Management, Synchronized.</Text>
         </View>
 
         {/* Features */}
@@ -125,17 +136,27 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#0f172a',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  splashImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 32,
+  },
+  loader: {
+    marginVertical: 20,
   },
   loadingText: {
     color: '#e2e8f0',
     marginTop: 16,
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '500',
   },
   content: {
     flex: 1,
@@ -144,7 +165,12 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 40,
+  },
+  appLogo: {
+    width: 120,
+    height: 120,
+    marginBottom: 24,
   },
   title: {
     fontSize: 42,
@@ -153,9 +179,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#cbd5e1',
+    fontSize: 16,
+    color: '#94a3b8',
     textAlign: 'center',
+    fontWeight: '500',
   },
   featuresContainer: {
     marginVertical: 40,
