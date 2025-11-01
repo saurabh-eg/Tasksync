@@ -19,6 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { useTaskStore } from '../../store/taskStore';
+import { getBackendUrl } from '../../utils/config';
 
 interface TaskForm {
   title: string;
@@ -38,9 +39,14 @@ export default function AddTaskScreen() {
     control,
     handleSubmit,
     formState: { errors }
-  } = useForm<TaskForm>();
+  } = useForm<TaskForm>({
+    defaultValues: {
+      title: '',
+      description: ''
+    }
+  });
 
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const BACKEND_URL = getBackendUrl();
 
   const onSubmit = async (data: TaskForm) => {
     if (!token) {
@@ -52,10 +58,16 @@ export default function AddTaskScreen() {
     
     try {
       const taskData = {
-        title: data.title.trim(),
-        description: data.description.trim(),
+        title: data.title?.trim() || '',
+        description: data.description?.trim() || '',
         due_date: dueDate?.toISOString() || null,
       };
+
+      console.log('=== TASK CREATION DEBUG ===');
+      console.log('Backend URL:', BACKEND_URL);
+      console.log('Token present:', !!token);
+      console.log('Token preview:', token?.substring(0, 50) + '...');
+      console.log('Task data:', taskData);
 
       const response = await fetch(`${BACKEND_URL}/api/tasks`, {
         method: 'POST',
@@ -66,8 +78,12 @@ export default function AddTaskScreen() {
         body: JSON.stringify(taskData),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (response.ok) {
         const newTask = await response.json();
+        console.log('Task created successfully:', newTask);
         addTask(newTask);
         
         Alert.alert('Success', 'Task created successfully!', [
@@ -77,12 +93,30 @@ export default function AddTaskScreen() {
           },
         ]);
       } else {
-        const error = await response.json();
-        Alert.alert('Error', error.detail || 'Failed to create task');
+        const errorText = await response.text();
+        console.log('Error response text:', errorText);
+        
+        let errorMessage = 'Failed to create task';
+        try {
+          const error = JSON.parse(errorText);
+          errorMessage = error.detail || errorMessage;
+        } catch {
+          errorMessage = `Server error: ${response.status}`;
+        }
+        
+        Alert.alert('Error', errorMessage);
       }
     } catch (error) {
-      console.error('Error creating task:', error);
-      Alert.alert('Error', 'Network error. Please check your connection.');
+      console.error('Network error details:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown network error';
+      console.log('Error type:', error?.constructor?.name || 'Unknown');
+      console.log('Error message:', errorMessage);
+      
+      Alert.alert(
+        'Network Error', 
+        `Connection failed: ${errorMessage}\n\nBackend: ${BACKEND_URL}\nToken: ${token ? 'Present' : 'Missing'}`
+      );
     } finally {
       setIsLoading(false);
     }

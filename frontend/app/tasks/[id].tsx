@@ -19,6 +19,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { useTaskStore, Task } from '../../store/taskStore';
+import { getBackendUrl } from '../../utils/config';
 
 interface TaskForm {
   title: string;
@@ -43,9 +44,14 @@ export default function TaskDetailScreen() {
     setValue,
     reset,
     formState: { errors, isDirty }
-  } = useForm<TaskForm>();
+  } = useForm<TaskForm>({
+    defaultValues: {
+      title: '',
+      description: ''
+    }
+  });
 
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const BACKEND_URL = getBackendUrl();
 
   useEffect(() => {
     // Find task in local store first
@@ -99,8 +105,8 @@ export default function TaskDetailScreen() {
     
     try {
       const updates = {
-        title: data.title.trim(),
-        description: data.description.trim(),
+        title: data.title?.trim() || '',
+        description: data.description?.trim() || '',
         due_date: dueDate?.toISOString() || null,
       };
 
@@ -622,11 +628,6 @@ const styles = StyleSheet.create({
   },
   clearDateButton: {
     padding: 4,
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 14,
-    marginTop: 4,
   },
   viewContainer: {
     padding: 20,

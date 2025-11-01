@@ -11,13 +11,33 @@ config.cacheStores = [
   new FileStore({ root: path.join(root, 'cache') }),
 ];
 
+// Enable bundle optimization for production
+config.transformer.minifierConfig = {
+  mangle: {
+    keep_fnames: true,
+  },
+  output: {
+    ascii_only: true,
+    quote_style: 3,
+    wrap_iife: true,
+  },
+  sourceMap: false,
+  toplevel: false,
+  warnings: false,
+  ecma: 5,
+  keep_classnames: false,
+  keep_fnames: false,
+  ie8: false,
+  module: false,
+  nameCache: null,
+  safari10: false,
+  webkit: false,
+};
 
-// // Exclude unnecessary directories from file watching
-// config.watchFolders = [__dirname];
-// config.resolver.blacklistRE = /(.*)\/(__tests__|android|ios|build|dist|.git|node_modules\/.*\/android|node_modules\/.*\/ios|node_modules\/.*\/windows|node_modules\/.*\/macos)(\/.*)?$/;
+// Tree shake unused code
+config.transformer.enableBabelRCLookup = false;
 
-// // Alternative: use a more aggressive exclusion pattern
-// config.resolver.blacklistRE = /node_modules\/.*\/(android|ios|windows|macos|__tests__|\.git|.*\.android\.js|.*\.ios\.js)$/;
+module.exports = config;
 
 // Reduce the number of workers to decrease resource usage
 config.maxWorkers = 2;

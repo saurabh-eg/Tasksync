@@ -19,6 +19,7 @@ import { useTaskStore, Task } from '../store/taskStore';
 import TaskCard from '../components/TaskCard';
 import FloatingActionButton from '../components/FloatingActionButton';
 import FilterBar from '../components/FilterBar';
+import { getBackendUrl } from '../utils/config';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const BACKEND_URL = getBackendUrl();
 
   useEffect(() => {
     if (!isAuthenticated) {

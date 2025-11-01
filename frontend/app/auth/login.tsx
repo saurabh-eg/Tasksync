@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
+import { getBackendUrl } from '../../utils/config';
 import { useAuthStore } from '../../store/authStore';
 
 interface LoginForm {
@@ -37,8 +37,8 @@ export default function LoginScreen() {
     formState: { errors }
   } = useForm<LoginForm>();
 
-  // Use Constants.expoConfig for environment variables in Expo SDK 51
-  const BACKEND_URL = Constants.expoConfig?.extra?.backendUrl || 'https://tasksyncpro.up.railway.app';
+  // Use centralized configuration utility
+  const BACKEND_URL = getBackendUrl();
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);

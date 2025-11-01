@@ -8,12 +8,20 @@
 
 # test files
 test_*.py
-tests.py
-pytest.ini
-
+backend_test.py
 debug_auth.py
+test_local.py
+test_final_auth.py
+test_password_fixes.py
+test_task_creation.py
+
+# Test results and summaries
+test_result.md
 fix_summary.md
-*.md
+model.patch
+
+# Environment files
+.env
 .env.local
 # Dependencies
 node_modules/
