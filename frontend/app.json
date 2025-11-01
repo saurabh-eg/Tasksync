@@ -52,7 +52,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "EXPO_PUBLIC_BACKEND_URL": "https://tasksyncpro.up.railway.app",
+      "EXPO_PUBLIC_BACKEND_URL": "https://tasksync-production.up.railway.app",
       "eas": {
         "projectId": "44952e1c-bb75-4be7-a1af-33e34e2a88d7"
       }

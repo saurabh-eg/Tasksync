@@ -12,7 +12,7 @@ export const getBackendUrl = (): string => {
     // 2. From process.env (works in development)
     process.env.EXPO_PUBLIC_BACKEND_URL ||
     // 3. Fallback URL (in case everything fails)
-    'https://tasksyncpro.up.railway.app';
+    'https://tasksync-production.up.railway.app';
 
   // Log for debugging
   console.log('Backend URL resolved to:', backendUrl);
