@@ -31,7 +31,7 @@ if "tls=true" not in mongo_url and "ssl=true" not in mongo_url:
     separator = "&" if "?" in mongo_url else "?"
     mongo_url = f"{mongo_url}{separator}tls=true&tlsAllowInvalidCertificates=false"
 
-print(f"Connecting to MongoDB with URL: {mongo_url[:50]}...")
+print(f"Connecting to MongoDB...")
 
 try:
     # Create SSL context with proper settings
